@@ -1,7 +1,6 @@
 # YPBSD Yocto Layer
 
-This workspace contains BitBake, OpenEmbedded-Core, FreeBSD source, and a
-project layer named `meta-ypbsd`.
+This requires [BitBake](https://git.openembedded.org/bitbake), [OpenEmbedded-Core](https://git.openembedded.org/openembedded-core), [FreeBSD source](https://cgit.freebsd.org/src).
 
 ## Build Setup
 
