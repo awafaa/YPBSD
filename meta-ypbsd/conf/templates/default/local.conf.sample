@@ -1,0 +1,20 @@
+MACHINE ??= "qemux86-64"
+
+PACKAGE_CLASSES ?= "package_ipk"
+
+# Build both OS images when invoking `bitbake ypbsd-image`.
+# Valid values are: linux, freebsd, both.
+YPBSD_IMAGE_TARGETS ?= "linux freebsd"
+
+# The FreeBSD recipe runs the checked-in freebsd-src tree through its native
+# build system. On non-FreeBSD hosts, set this to a BSD make implementation.
+#FREEBSD_MAKE ?= "bmake"
+
+# Override these for FreeBSD targets not covered by the default Yocto-to-FreeBSD
+# architecture mapping.
+#FREEBSD_TARGET ?= "amd64"
+#FREEBSD_TARGET_ARCH ?= "amd64"
+
+USER_CLASSES ?= "buildstats"
+PATCHRESOLVE = "noop"
+
