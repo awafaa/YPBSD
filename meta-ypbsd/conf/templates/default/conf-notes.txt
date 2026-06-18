@@ -1,5 +1,0 @@
-Common targets are:
-    ypbsd-linux-image  - build the Linux image
-    freebsd-image      - build the FreeBSD rootfs image
-    ypbsd-image        - build the images selected by YPBSD_IMAGE_TARGETS
-

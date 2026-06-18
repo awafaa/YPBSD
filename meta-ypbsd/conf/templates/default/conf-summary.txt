@@ -1,2 +1,0 @@
-YPBSD builds Linux and/or FreeBSD images from one Yocto build directory.
-

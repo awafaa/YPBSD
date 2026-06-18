@@ -1,0 +1,19 @@
+# Linux workflow:
+#   MACHINE = "qemux86-64"
+#   DISTRO = "nodistro"
+#   bitbake core-image-minimal
+#
+# FreeBSD workflow:
+#   MACHINE = "freebsd-amd64"
+#   DISTRO = "freebsd"
+#   bitbake freebsd-image-minimal
+
+MACHINE ??= "freebsd-amd64"
+DISTRO ??= "freebsd"
+
+PACKAGE_CLASSES ?= "package_ipk"
+EXTRA_IMAGE_FEATURES ?= "debug-tweaks"
+USER_CLASSES ?= "buildstats"
+PATCHRESOLVE = "noop"
+
+CONF_VERSION = "2"
