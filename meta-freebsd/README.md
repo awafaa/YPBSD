@@ -31,9 +31,9 @@ Build FreeBSD with the same BitBake workflow:
 MACHINE=freebsd-amd64 DISTRO=freebsd bitbake freebsd-image-minimal
 ```
 
-The FreeBSD image recipe uses `FREEBSD_SRC_URI = "file://${TOPDIR}/../freebsd-src"`
-by default, so the local `freebsd-src` checkout next to `openembedded-core` is
-used without fetching from the network.
+The FreeBSD recipes use `FREEBSD_SRC_DIR = "${TOPDIR}/../freebsd-src"` by
+default, so the local `freebsd-src` checkout next to `openembedded-core` is used
+directly without fetching from the network.
 
 The FreeBSD recipes use BSD make. On Linux hosts, install `bmake`; install
 `makefs` as well if you want the `.ufs.img` artifact in addition to the tarball.
