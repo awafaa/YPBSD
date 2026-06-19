@@ -4,6 +4,8 @@ LICENSE = "BSD-2-Clause"
 
 inherit deploy nopackages
 
+INHIBIT_DEFAULT_DEPS = "1"
+
 IMAGE_BASENAME ?= "freebsd-image-minimal"
 FREEBSD_IMAGE_ROOTFS = "${WORKDIR}/rootfs"
 FREEBSD_IMAGE_SIZE ?= "1024m"

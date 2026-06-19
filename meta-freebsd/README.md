@@ -53,3 +53,6 @@ The FreeBSD recipes use BSD make. On Linux hosts, install `bmake`; install
 
 Override `FREEBSD_TARGET`, `FREEBSD_TARGET_ARCH`, or `FREEBSD_KERNEL_CONFIG` in
 `conf/local.conf` for other FreeBSD target combinations.
+
+`TARGET_OS` defaults to `freebsd${DISTRO_VERSION}` so GNU tooling sees a
+versioned FreeBSD target tuple such as `aarch64-oe-freebsd14`.
