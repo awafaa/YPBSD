@@ -38,6 +38,9 @@ directly without fetching from the network.
 The FreeBSD recipes use BSD make. On Linux hosts, install `bmake`; install
 `makefs` as well if you want the `.ufs.img` artifact in addition to the tarball.
 
+The default build disables FreeBSD's CA root rehash step with `WITHOUT_CAROOT=yes`
+so the bootstrap does not depend on host OpenSSL development headers.
+
 ## Outputs
 
 `freebsd-image-minimal` deploys:

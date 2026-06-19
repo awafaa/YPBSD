@@ -38,6 +38,7 @@ do_configure[cleandirs] = "${B}"
 do_configure() {
 	install -d ${B}
 	cat > ${FREEBSD_MAKE_CONF} <<'EOF'
+WITHOUT_CAROOT=yes
 WITHOUT_DEBUG_FILES=yes
 WITHOUT_TESTS=yes
 EOF
