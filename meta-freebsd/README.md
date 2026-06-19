@@ -35,8 +35,9 @@ The FreeBSD recipes use `FREEBSD_SRC_DIR = "${TOPDIR}/../freebsd-src"` by
 default, so the local `freebsd-src` checkout next to `openembedded-core` is used
 directly without fetching from the network.
 
-The FreeBSD recipes use BSD make. On Linux hosts, install `bmake`; install
-`makefs` as well if you want the `.ufs.img` artifact in addition to the tarball.
+The FreeBSD recipes use BSD make and FreeBSD's bootstrap toolchain. On Linux
+hosts, install `bmake`, `flex`, `m4`, and `yacc`/`bison`; install `makefs` as
+well if you want the `.ufs.img` artifact in addition to the tarball.
 
 The default build disables FreeBSD's CA root rehash step with `WITHOUT_CAROOT=yes`
 so the bootstrap does not depend on host OpenSSL development headers.
