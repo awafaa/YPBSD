@@ -38,6 +38,8 @@ directly without fetching from the network.
 The FreeBSD recipes use BSD make and FreeBSD's bootstrap toolchain. On Linux
 hosts, install `bmake`, `flex`, `m4`, and `yacc`/`bison`; install `makefs` as
 well if you want the `.ufs.img` artifact in addition to the tarball.
+FreeBSD bootstrap tools that need libarchive use OE-Core's `libarchive-native`
+sysroot instead of host distribution headers.
 
 The default build disables FreeBSD's CA root rehash step with `WITHOUT_CAROOT=yes`
 so the bootstrap does not depend on host OpenSSL development headers.
