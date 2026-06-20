@@ -46,6 +46,9 @@ so the bootstrap does not depend on host OpenSSL development headers.
 The FreeBSD source build is throttled to one `bmake` job by default to keep LLVM
 bootstrap memory use predictable. Set `FREEBSD_MAKE_JOBS_LIMIT` in
 `conf/local.conf` after the first successful build if your host has enough RAM.
+World compilation is ordered before kernel compilation for image builds so a
+kernel failure does not leave a long-running world build active in the
+background.
 
 ## Outputs
 

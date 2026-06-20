@@ -8,6 +8,8 @@ inherit freebsd-src deploy nopackages
 
 PROVIDES += "virtual/kernel"
 
+do_compile[depends] += "freebsd-world:do_compile"
+
 do_compile() {
 	freebsd_do_make kernel-toolchain buildkernel
 }
