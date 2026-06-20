@@ -50,8 +50,29 @@ freebsd_apply_source_patches() {
 		bbnote "Applying FreeBSD ctermid SSP compatibility patch"
 		patch -d ${S} -N -p1 < ${FREEBSD_LAYERDIR}/patches/freebsd-src/0001-libc-ctermid-avoid-ssp-parameter-name-collision.patch || true
 	fi
-	if ! grep -Fq '__ssp_real(ctermid)(char *buf)' ${S}/lib/libc/gen/ctermid.c; then
+	if ! grep -Fq 'return (buf);' ${S}/lib/libc/gen/ctermid.c; then
+		bbnote "Rewriting FreeBSD ctermid SSP compatibility change directly"
+		sed -i \
+			-e '/__ssp_real(ctermid)(char \*s)/,/^}/ {
+				s/__ssp_real(ctermid)(char \*s)/__ssp_real(ctermid)(char *buf)/
+				s/if (s == NULL)/if (buf == NULL)/
+				s/s = def/buf = def/
+				s/strcpy(s,/strcpy(buf,/
+				s/kern.devname", s +/kern.devname", buf +/
+				s/return (s);/return (buf);/
+			}' \
+			-e '/__ssp_real(ctermid_r)(char \*s)/,/^}/ {
+				s/__ssp_real(ctermid_r)(char \*s)/__ssp_real(ctermid_r)(char *buf)/
+				s/s != NULL/buf != NULL/
+				s/ctermid(s)/ctermid(buf)/
+			}' \
+			${S}/lib/libc/gen/ctermid.c
+	fi
+	if ! grep -Fq 'return (buf);' ${S}/lib/libc/gen/ctermid.c; then
 		bbfatal "FreeBSD ctermid SSP compatibility patch was not applied to ${S}/lib/libc/gen/ctermid.c"
+	fi
+	if grep -Fq 'return (s);' ${S}/lib/libc/gen/ctermid.c; then
+		bbfatal "FreeBSD ctermid.c still contains the incompatible 'return (s);' line"
 	fi
 }
 
