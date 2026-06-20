@@ -48,6 +48,11 @@ addtask validate_freebsd_src after do_unpack before do_configure
 do_configure[cleandirs] = "${B}"
 do_configure() {
 	install -d ${B}
+	if grep -q '__ssp_real(ctermid)(char \*s)' ${S}/lib/libc/gen/ctermid.c; then
+		patch -d ${S} -p1 < ${FREEBSD_LAYERDIR}/patches/freebsd-src/0001-libc-ctermid-avoid-ssp-parameter-name-collision.patch
+	elif ! grep -q '__ssp_real(ctermid)(char \*buf)' ${S}/lib/libc/gen/ctermid.c; then
+		bbwarn "Unable to determine whether the FreeBSD ctermid SSP compatibility patch is applied."
+	fi
 	cat > ${FREEBSD_MAKE_CONF} <<'EOF'
 WITHOUT_CAROOT=yes
 WITHOUT_DEBUG_FILES=yes
