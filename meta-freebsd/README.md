@@ -42,7 +42,9 @@ FreeBSD bootstrap tools that need libarchive use OE-Core's `libarchive-native`
 sysroot instead of host distribution headers.
 
 The default build disables FreeBSD's CA root rehash step with `WITHOUT_CAROOT=yes`
-so the bootstrap does not depend on host OpenSSL development headers.
+so the bootstrap does not depend on host OpenSSL development headers. It also
+sets `WITHOUT_LIB32=yes` to avoid building 32-bit compatibility objects for the
+initial FreeBSD image bring-up.
 The FreeBSD source build is throttled to one `bmake` job by default to keep LLVM
 bootstrap memory use predictable. Set `FREEBSD_MAKE_JOBS_LIMIT` in
 `conf/local.conf` after the first successful build if your host has enough RAM.
