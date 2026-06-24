@@ -25,6 +25,26 @@ do_deploy() {
 	tar --sort=name --numeric-owner --format=posix \
 		-cf ${DEPLOYDIR}/freebsd-world-${MACHINE}.tar \
 		-C ${D} .
+
+	install -d ${DEPLOYDIR}/freebsd-image-tools-${MACHINE}
+	for tool in makefs mkimg etdump; do
+		tool_path=""
+		for bindir in \
+			${FREEBSD_WORLDTMP}/legacy/usr/sbin \
+			${FREEBSD_WORLDTMP}/legacy/usr/bin \
+			${FREEBSD_WORLDTMP}/legacy/sbin \
+			${FREEBSD_WORLDTMP}/legacy/bin; do
+			if [ -x ${bindir}/${tool} ]; then
+				tool_path=${bindir}/${tool}
+				break
+			fi
+		done
+		if [ -n "${tool_path}" ]; then
+			install -m 0755 ${tool_path} ${DEPLOYDIR}/freebsd-image-tools-${MACHINE}/${tool}
+		else
+			bbwarn "FreeBSD bootstrap tool '${tool}' was not found under ${FREEBSD_WORLDTMP}/legacy; ISO creation may require a host-provided ${tool}"
+		fi
+	done
 }
 
 addtask deploy after do_install before do_build

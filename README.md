@@ -39,8 +39,10 @@ default, so the local `freebsd-src` checkout next to `openembedded-core` is used
 directly without fetching from the network.
 
 The FreeBSD recipes use BSD make and FreeBSD's bootstrap toolchain. On Linux
-hosts, install `bmake`, `flex`, `m4`, and `yacc`/`bison`; install `makefs` as
-well if you want the `.ufs.img` artifact in addition to the tarball.
+hosts, install `bmake`, `flex`, `m4`, and `yacc`/`bison`. The build deploys
+FreeBSD's bootstrapped `makefs`, `mkimg`, and `etdump` tools from `freebsd-world`
+and uses them to create bootable `.iso` and `.ufs.img` artifacts. Host-provided
+versions of those tools are used only as a fallback.
 FreeBSD bootstrap tools that need libarchive use OE-Core's `libarchive-native`
 sysroot instead of host distribution headers.
 
@@ -60,7 +62,8 @@ background.
 `freebsd-image-minimal` deploys:
 
 - `freebsd-image-minimal-${MACHINE}.tar`, containing FreeBSD world and kernel.
-- `freebsd-image-minimal-${MACHINE}.ufs.img`, when the host provides `makefs`.
+- `freebsd-image-minimal-${MACHINE}.iso`, a bootable FreeBSD ISO image.
+- `freebsd-image-minimal-${MACHINE}.ufs.img`, a UFS disk image.
 - `kernel-${MACHINE}-${FREEBSD_KERNEL_CONFIG}`, from the `freebsd-kernel` recipe.
 
 ## Supported Machines
