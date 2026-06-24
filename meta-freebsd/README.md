@@ -36,10 +36,10 @@ default, so the local `freebsd-src` checkout next to `openembedded-core` is used
 directly without fetching from the network.
 
 The FreeBSD recipes use BSD make and FreeBSD's bootstrap toolchain. On Linux
-hosts, install `bmake`, `flex`, `m4`, and `yacc`/`bison`. The build deploys
-FreeBSD's bootstrapped `makefs`, `mkimg`, and `etdump` tools from `freebsd-world`
-and uses them to create bootable `.iso` and `.ufs.img` artifacts. Host-provided
-versions of those tools are used only as a fallback.
+hosts, install `bmake`, `flex`, `m4`, and `yacc`/`bison`. The
+`freebsd-image-tools-native` recipe builds FreeBSD's `makefs`, `mkimg`, and
+`etdump` tools into the native sysroot and the image recipe uses them to create
+bootable `.iso` and `.ufs.img` artifacts.
 FreeBSD bootstrap tools that need libarchive use OE-Core's `libarchive-native`
 sysroot instead of host distribution headers.
 

@@ -42,7 +42,7 @@ EOF
 	cp -a ${FREEBSD_IMAGE_ROOTFS}/. ${D}/
 }
 
-do_deploy[depends] += "freebsd-world:do_deploy freebsd-kernel:do_deploy"
+do_deploy[depends] += "freebsd-world:do_deploy freebsd-kernel:do_deploy freebsd-image-tools-native:do_populate_sysroot"
 do_deploy[cleandirs] = "${DEPLOYDIR} ${FREEBSD_IMAGE_ISODIR} ${FREEBSD_ISO_TOOLSDIR}"
 do_deploy() {
 	install -d ${DEPLOYDIR}
