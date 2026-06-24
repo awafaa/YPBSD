@@ -72,7 +72,7 @@ EOF
 do_compile() {
 	unset ${FREEBSD_ENV_UNSET}
 	${FREEBSD_SRC_ENV} ${FREEBSD_MAKE} -s -DBOOTSTRAP_ALL_TOOLS \
-		-C "${S}" -f Makefile.inc1 ${FREEBSD_SRC_ARGS} ${FREEBSD_MAKE_JOBS} \
+		-C "${S}" ${FREEBSD_SRC_ARGS} ${FREEBSD_MAKE_JOBS} \
 		_worldtmp _legacy _bootstrap-tools
 }
 do_compile[network] = "0"
