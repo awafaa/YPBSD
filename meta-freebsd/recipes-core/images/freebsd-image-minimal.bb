@@ -119,8 +119,10 @@ do_deploy() {
 			-v rootfs_kb="${rootfs_kb}" \
 			-v overhead="${FREEBSD_IMAGE_OVERHEAD_FACTOR}" \
 			-v extra="${FREEBSD_IMAGE_EXTRA_SPACE}" \
-			'BEGIN { printf "%d", (rootfs_kb * overhead) + extra }')"
-		image_size_kb="$(( ((image_size_kb + 16383) / 16384) * 16384 ))"
+			'BEGIN {
+				size = (rootfs_kb * overhead) + extra
+				printf "%d", int((size + 16383) / 16384) * 16384
+			}')"
 		image_size_arg="${image_size_kb}k"
 	else
 		image_size_arg="${FREEBSD_IMAGE_SIZE}"
