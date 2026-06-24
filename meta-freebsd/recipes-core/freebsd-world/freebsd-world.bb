@@ -32,6 +32,7 @@ do_deploy() {
 		for bindir in \
 			${FREEBSD_WORLDTMP}/legacy/usr/sbin \
 			${FREEBSD_WORLDTMP}/legacy/usr/bin \
+			${FREEBSD_WORLDTMP}/legacy/usr/libexec \
 			${FREEBSD_WORLDTMP}/legacy/sbin \
 			${FREEBSD_WORLDTMP}/legacy/bin; do
 			if [ -x ${bindir}/${tool} ]; then
@@ -39,6 +40,14 @@ do_deploy() {
 				break
 			fi
 		done
+		if [ -z "${tool_path}" ] && [ -d ${FREEBSD_WORLDTMP}/legacy ]; then
+			for candidate in $(find ${FREEBSD_WORLDTMP}/legacy -type f -name ${tool}); do
+				if [ -x ${candidate} ]; then
+					tool_path=${candidate}
+					break
+				fi
+			done
+		fi
 		if [ -n "${tool_path}" ]; then
 			install -m 0755 ${tool_path} ${DEPLOYDIR}/freebsd-image-tools-${MACHINE}/${tool}
 		else

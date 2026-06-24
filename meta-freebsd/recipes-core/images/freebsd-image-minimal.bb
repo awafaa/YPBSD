@@ -15,6 +15,10 @@ FREEBSD_ISO_BOOTABLE ?= "1"
 FREEBSD_ISO_LABEL ?= "FREEBSD_${FREEBSD_ABI_VERSION}_${FREEBSD_TARGET}"
 FREEBSD_ISO_IMAGE ?= "${IMAGE_BASENAME}-${MACHINE}.iso"
 FREEBSD_IMAGE_TOOLSDIR ?= "${DEPLOY_DIR_IMAGE}/freebsd-image-tools-${MACHINE}"
+FREEBSD_ISO_TOOLSDIR ?= "${WORKDIR}/iso-tools"
+FREEBSD_WORLD_WORKDIR ?= "${BASE_WORKDIR}/${MULTIMACH_TARGET_SYS}/freebsd-world/1.0"
+FREEBSD_WORLD_OBJROOT ?= "${FREEBSD_WORLD_WORKDIR}/build/obj${FREEBSD_SRC_DIR}/${FREEBSD_TARGET}.${FREEBSD_TARGET_ARCH}"
+FREEBSD_WORLD_BOOTSTRAP_TOOLSDIR ?= "${FREEBSD_WORLD_OBJROOT}/tmp/legacy"
 
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"
@@ -38,7 +42,8 @@ EOF
 	cp -a ${FREEBSD_IMAGE_ROOTFS}/. ${D}/
 }
 
-do_deploy[cleandirs] = "${FREEBSD_IMAGE_ISODIR}"
+do_deploy[depends] += "freebsd-world:do_deploy freebsd-kernel:do_deploy"
+do_deploy[cleandirs] = "${DEPLOYDIR} ${FREEBSD_IMAGE_ISODIR} ${FREEBSD_ISO_TOOLSDIR}"
 do_deploy() {
 	install -d ${DEPLOYDIR}
 
@@ -55,17 +60,55 @@ do_deploy() {
 		iso_required_tools="${iso_required_tools} mkimg etdump"
 	fi
 
-	iso_tools_path="${FREEBSD_IMAGE_TOOLSDIR}:$PATH"
+	freebsd_find_image_tool() {
+		tool="$1"
+		for dir in \
+			${FREEBSD_IMAGE_TOOLSDIR} \
+			${FREEBSD_WORLD_BOOTSTRAP_TOOLSDIR}/usr/sbin \
+			${FREEBSD_WORLD_BOOTSTRAP_TOOLSDIR}/usr/bin \
+			${FREEBSD_WORLD_BOOTSTRAP_TOOLSDIR}/usr/libexec \
+			${FREEBSD_WORLD_BOOTSTRAP_TOOLSDIR}/sbin \
+			${FREEBSD_WORLD_BOOTSTRAP_TOOLSDIR}/bin; do
+			if [ -x "${dir}/${tool}" ]; then
+				echo "${dir}/${tool}"
+				return 0
+			fi
+		done
+		if [ -d ${FREEBSD_WORLD_BOOTSTRAP_TOOLSDIR} ]; then
+			candidate="$(find ${FREEBSD_WORLD_BOOTSTRAP_TOOLSDIR} -type f -name "${tool}" -perm /111 | head -n 1)"
+			if [ -n "${candidate}" ]; then
+				echo "${candidate}"
+				return 0
+			fi
+		fi
+		command -v "${tool}" || return 1
+	}
+
+	install -d ${FREEBSD_ISO_TOOLSDIR}
 	missing_iso_tools=""
 	for tool in ${iso_required_tools}; do
-		if ! PATH="${iso_tools_path}" command -v ${tool} >/dev/null 2>&1; then
+		tool_path="$(freebsd_find_image_tool ${tool} || true)"
+		if [ -n "${tool_path}" ]; then
+			install -m 0755 "${tool_path}" ${FREEBSD_ISO_TOOLSDIR}/${tool}
+		else
 			missing_iso_tools="${missing_iso_tools} ${tool}"
 		fi
 	done
 	if [ -n "${missing_iso_tools}" ]; then
-		bbfatal "Missing tool(s) required to create FreeBSD ISO:${missing_iso_tools}. Expected FreeBSD bootstrap tools in ${FREEBSD_IMAGE_TOOLSDIR}, or host-provided makefs, mkimg, and etdump."
+		if [ -d "${FREEBSD_IMAGE_TOOLSDIR}" ]; then
+			bbnote "Contents of ${FREEBSD_IMAGE_TOOLSDIR}: $(ls -la ${FREEBSD_IMAGE_TOOLSDIR})"
+		else
+			bbnote "${FREEBSD_IMAGE_TOOLSDIR} does not exist"
+		fi
+		if [ -d "${FREEBSD_WORLD_BOOTSTRAP_TOOLSDIR}" ]; then
+			bbnote "Searched FreeBSD bootstrap tools under ${FREEBSD_WORLD_BOOTSTRAP_TOOLSDIR}"
+		else
+			bbnote "${FREEBSD_WORLD_BOOTSTRAP_TOOLSDIR} does not exist"
+		fi
+		bbfatal "Missing tool(s) required to create FreeBSD ISO:${missing_iso_tools}. Expected FreeBSD bootstrap tools in ${FREEBSD_IMAGE_TOOLSDIR} or ${FREEBSD_WORLD_BOOTSTRAP_TOOLSDIR}, or host-provided makefs, mkimg, and etdump."
 	fi
 
+	iso_tools_path="${FREEBSD_ISO_TOOLSDIR}:$PATH"
 	PATH="${iso_tools_path}" makefs -t ${FREEBSD_IMAGE_FSTYPE} -s ${FREEBSD_IMAGE_SIZE} \
 		${DEPLOYDIR}/${IMAGE_BASENAME}-${MACHINE}.${FREEBSD_IMAGE_FSTYPE}.img \
 		${FREEBSD_IMAGE_ROOTFS}
