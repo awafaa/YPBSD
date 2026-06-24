@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://COPYRIGHT;md5=b72344678cd27c1a842962ff019ac961"
 inherit native nopackages
 
 INHIBIT_DEFAULT_DEPS = "1"
-DEPENDS += "libarchive-native libbsd-native"
+DEPENDS += "bison-native flex-native libarchive-native libbsd-native m4-native"
 
 FREEBSD_SRC_DIR ?= "${@os.path.abspath(os.path.join(d.getVar('TOPDIR'), '..', 'freebsd-src'))}"
 FREEBSD_TARGET ?= "arm64"
@@ -16,9 +16,10 @@ FREEBSD_MAKE ?= "bmake"
 FREEBSD_MAKE_JOBS_LIMIT ?= "1"
 FREEBSD_MAKE_JOBS ?= "-j ${FREEBSD_MAKE_JOBS_LIMIT}"
 FREEBSD_MAKE_CONF ?= "${WORKDIR}/make.conf"
+FREEBSD_BUILD_TOOLS_DIR ?= "${WORKDIR}/freebsd-build-tools"
 FREEBSD_OBJROOT ?= "${B}/obj${FREEBSD_SRC_DIR}/${FREEBSD_TARGET}.${FREEBSD_TARGET_ARCH}"
 FREEBSD_WORLDTMP ?= "${FREEBSD_OBJROOT}/tmp"
-FREEBSD_SRC_ENV ?= "MAKEOBJDIRPREFIX=${B}/obj SRCCONF=/dev/null __MAKE_CONF=${FREEBSD_MAKE_CONF} LD_LIBRARY_PATH=${STAGING_LIBDIR_NATIVE}"
+FREEBSD_SRC_ENV ?= "MAKEOBJDIRPREFIX=${B}/obj SRCCONF=/dev/null __MAKE_CONF=${FREEBSD_MAKE_CONF} LEX=lex YACC=yacc LD_LIBRARY_PATH=${STAGING_LIBDIR_NATIVE} PATH=${FREEBSD_BUILD_TOOLS_DIR}:${PATH}"
 FREEBSD_SRC_ARGS ?= "TARGET=${FREEBSD_TARGET} TARGET_ARCH=${FREEBSD_TARGET_ARCH}"
 FREEBSD_ENV_UNSET ?= " \
     AR AS CC CCLD CPP CXX LD NM OBJCOPY OBJDUMP RANLIB READELF STRIP \
@@ -47,9 +48,21 @@ do_validate_freebsd_src() {
 
 addtask validate_freebsd_src after do_unpack before do_configure
 
+freebsd_prepare_build_tools() {
+	install -d ${FREEBSD_BUILD_TOOLS_DIR}
+	ln -sf ${STAGING_BINDIR_NATIVE}/flex ${FREEBSD_BUILD_TOOLS_DIR}/lex
+	if [ -x ${STAGING_BINDIR_NATIVE}/yacc ]; then
+		ln -sf ${STAGING_BINDIR_NATIVE}/yacc ${FREEBSD_BUILD_TOOLS_DIR}/yacc
+	else
+		ln -sf ${STAGING_BINDIR_NATIVE}/bison ${FREEBSD_BUILD_TOOLS_DIR}/yacc
+	fi
+	ln -sf ${STAGING_BINDIR_NATIVE}/m4 ${FREEBSD_BUILD_TOOLS_DIR}/m4
+}
+
 do_configure[cleandirs] = "${B}"
 do_configure() {
 	install -d ${B}
+	freebsd_prepare_build_tools
 	cat > ${FREEBSD_MAKE_CONF} <<'EOF'
 WITHOUT_CAROOT=yes
 WITHOUT_CLANG=yes
@@ -70,6 +83,7 @@ EOF
 }
 
 do_compile() {
+	freebsd_prepare_build_tools
 	unset ${FREEBSD_ENV_UNSET}
 	${FREEBSD_SRC_ENV} ${FREEBSD_MAKE} -s -DBOOTSTRAP_ALL_TOOLS \
 		-C "${S}" ${FREEBSD_SRC_ARGS} ${FREEBSD_MAKE_JOBS} \
