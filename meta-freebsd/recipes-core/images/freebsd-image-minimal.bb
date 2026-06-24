@@ -9,7 +9,9 @@ INHIBIT_DEFAULT_DEPS = "1"
 IMAGE_BASENAME ?= "freebsd-image-minimal"
 FREEBSD_IMAGE_ROOTFS = "${WORKDIR}/rootfs"
 FREEBSD_IMAGE_ISODIR = "${WORKDIR}/iso-root"
-FREEBSD_IMAGE_SIZE ?= "1024m"
+FREEBSD_IMAGE_SIZE ?= "auto"
+FREEBSD_IMAGE_EXTRA_SPACE ?= "65536"
+FREEBSD_IMAGE_OVERHEAD_FACTOR ?= "1.3"
 # FreeBSD makefs uses "ffs" for UFS filesystem images; keep the artifact named .ufs.img.
 FREEBSD_IMAGE_FSTYPE ?= "ffs"
 FREEBSD_IMAGE_EXTENSION ?= "ufs"
@@ -111,7 +113,20 @@ do_deploy() {
 	fi
 
 	iso_tools_path="${FREEBSD_ISO_TOOLSDIR}:$PATH"
-	PATH="${iso_tools_path}" makefs -t ${FREEBSD_IMAGE_FSTYPE} -s ${FREEBSD_IMAGE_SIZE} \
+	if [ "${FREEBSD_IMAGE_SIZE}" = "auto" ]; then
+		rootfs_kb="$(du -sk ${FREEBSD_IMAGE_ROOTFS} | awk '{ print $1 }')"
+		image_size_kb="$(awk \
+			-v rootfs_kb="${rootfs_kb}" \
+			-v overhead="${FREEBSD_IMAGE_OVERHEAD_FACTOR}" \
+			-v extra="${FREEBSD_IMAGE_EXTRA_SPACE}" \
+			'BEGIN { printf "%d", (rootfs_kb * overhead) + extra }')"
+		image_size_kb="$(( ((image_size_kb + 16383) / 16384) * 16384 ))"
+		image_size_arg="${image_size_kb}k"
+	else
+		image_size_arg="${FREEBSD_IMAGE_SIZE}"
+	fi
+
+	PATH="${iso_tools_path}" makefs -t ${FREEBSD_IMAGE_FSTYPE} -s "${image_size_arg}" \
 		${DEPLOYDIR}/${IMAGE_BASENAME}-${MACHINE}.${FREEBSD_IMAGE_EXTENSION}.img \
 		${FREEBSD_IMAGE_ROOTFS}
 

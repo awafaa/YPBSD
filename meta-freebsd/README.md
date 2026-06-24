@@ -53,6 +53,9 @@ bootstrap memory use predictable. Set `FREEBSD_MAKE_JOBS_LIMIT` in
 World compilation is ordered before kernel compilation for image builds so a
 kernel failure does not leave a long-running world build active in the
 background.
+UFS image sizing defaults to `FREEBSD_IMAGE_SIZE = "auto"`, which adds overhead
+and extra free space to the assembled root filesystem. Set `FREEBSD_IMAGE_SIZE`
+in `conf/local.conf` if you need a fixed image size.
 
 ## Outputs
 
