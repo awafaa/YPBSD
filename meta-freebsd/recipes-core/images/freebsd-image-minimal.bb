@@ -46,7 +46,7 @@ do_deploy() {
 		-cf ${DEPLOYDIR}/${IMAGE_BASENAME}-${MACHINE}.tar \
 		-C ${FREEBSD_IMAGE_ROOTFS} .
 
-	if [ ! -x ${FREEBSD_SRC_DIR}/release/${FREEBSD_TARGET}/mkisoimages.sh ]; then
+	if [ ! -f ${FREEBSD_SRC_DIR}/release/${FREEBSD_TARGET}/mkisoimages.sh ]; then
 		bbfatal "No FreeBSD ISO builder found for TARGET=${FREEBSD_TARGET}: ${FREEBSD_SRC_DIR}/release/${FREEBSD_TARGET}/mkisoimages.sh"
 	fi
 
